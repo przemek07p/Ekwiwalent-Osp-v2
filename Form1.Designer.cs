@@ -3,13 +3,10 @@
     partial class Form1
     {
         private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.ComboBox comboBoxTables;
-        private System.Windows.Forms.Button buttonNext;
         private System.Windows.Forms.Button buttonAddTable;
         private System.Windows.Forms.Button buttonDeleteTable;
         private System.Windows.Forms.TextBox textBoxTableName;
         private System.Windows.Forms.ListBox listBoxTables;
-        private System.Windows.Forms.Button buttonRatownicy;
 
         private void InitializeComponent()
         {
@@ -17,9 +14,9 @@
             buttonDeleteTable = new Button();
             textBoxTableName = new TextBox();
             listBoxTables = new ListBox();
-            comboBoxTables = new ComboBox();
-            buttonNext = new Button();
             buttonRatownicy = new Button();
+            buttonNext = new Button();
+            comboBoxTables = new ComboBox();
             SuspendLayout();
             // 
             // buttonAddTable
@@ -58,13 +55,15 @@
             listBoxTables.Size = new Size(260, 139);
             listBoxTables.TabIndex = 5;
             // 
-            // comboBoxTables
+            // buttonRatownicy
             // 
-            comboBoxTables.FormattingEnabled = true;
-            comboBoxTables.Location = new Point(12, 12);
-            comboBoxTables.Name = "comboBoxTables";
-            comboBoxTables.Size = new Size(260, 23);
-            comboBoxTables.TabIndex = 6;
+            buttonRatownicy.Location = new Point(278, 201);
+            buttonRatownicy.Name = "buttonRatownicy";
+            buttonRatownicy.Size = new Size(75, 23);
+            buttonRatownicy.TabIndex = 8;
+            buttonRatownicy.Text = "Ratownicy";
+            buttonRatownicy.UseVisualStyleBackColor = true;
+            buttonRatownicy.Click += buttonRatownicy_Click;
             // 
             // buttonNext
             // 
@@ -76,15 +75,13 @@
             buttonNext.UseVisualStyleBackColor = true;
             buttonNext.Click += buttonNext_Click;
             // 
-            // buttonRatownicy
+            // comboBoxTables
             // 
-            buttonRatownicy.Location = new Point(278, 201);
-            buttonRatownicy.Name = "buttonRatownicy";
-            buttonRatownicy.Size = new Size(75, 23);
-            buttonRatownicy.TabIndex = 8;
-            buttonRatownicy.Text = "Ratownicy";
-            buttonRatownicy.UseVisualStyleBackColor = true;
-            buttonRatownicy.Click += buttonRatownicy_Click;
+            comboBoxTables.FormattingEnabled = true;
+            comboBoxTables.Location = new Point(12, 12);
+            comboBoxTables.Name = "comboBoxTables";
+            comboBoxTables.Size = new Size(260, 23);
+            comboBoxTables.TabIndex = 6;
             // 
             // Form1
             // 
@@ -102,5 +99,9 @@
             ResumeLayout(false);
             PerformLayout();
         }
+
+        private Button buttonRatownicy;
+        private Button buttonNext;
+        private ComboBox comboBoxTables;
     }
 }

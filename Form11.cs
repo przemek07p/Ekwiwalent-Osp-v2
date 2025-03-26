@@ -11,17 +11,55 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace bazy
 {
     public partial class Form11 : Form
     {
+        private string stawka = "";
         private List<string> listaNazwisk = new List<string>();
-
+        private string connectionString = "server=localhost;user=root;password=;database=Kwartalna;";
         public Form11()
         {
             InitializeComponent();
+            PobierzTabeleDoComboBoxa();
         }
+    
+        private void PobierzTabeleDoComboBoxa()
+        {
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    MySqlCommand cmd = new MySqlCommand("SHOW TABLES;", connection); // SQL do pobrania tabel
+                    MySqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        // Dodawanie nazw tabel do ComboBox
+                        comboBoxTabele.Items.Add(reader.GetString(0));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Błąd połączenia z bazą danych: " + ex.Message);
+                }
+            }
+        }
+        private void txtStawka_TextChanged(object sender, EventArgs e)
+        {
+            stawka = txtStawka.Text;
+        }
+
+        private void btnPodmienNazwiska_Click(object sender, EventArgs e)
+        {
+            Funkcje.PodmienNazwiskaWExcelu(dataGridView1, listaNazwisk);
+            Funkcje.UsunPrzedrostkiZJednostki(dataGridView1);
+            Funkcje.ZaokraglijCzasUdzialu(dataGridView1);
+        }
+
 
         private void btnWybierzPlik_Click(object sender, EventArgs e)
         {
@@ -55,11 +93,9 @@ namespace bazy
             }
         }
 
-        private void btnPodmienNazwiska_Click(object sender, EventArgs e)
-        {
-            PodmienNazwiskaWExcelu();
-            UsunPrzedrostkiZJednostki();
-        }
+
+
+
 
         private void WczytajNazwiskaZPliku(string filePath)
         {
@@ -157,45 +193,111 @@ namespace bazy
             return (!string.IsNullOrEmpty(excelDate) && excelDate.Length > 6) ? excelDate.Substring(0, excelDate.Length - 6) : excelDate;
         }
 
-        private void PodmienNazwiskaWExcelu()
+
+        private void btnZapiszDoPliku_Click(object sender, EventArgs e)
         {
-            if (listaNazwisk.Count == 0)
+            SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                MessageBox.Show("Najpierw wczytaj plik z nazwiskami.");
+                Title = "Zapisz plik tekstowy",
+                Filter = "Pliki tekstowe (*.txt)|*.txt",
+                DefaultExt = "txt"
+            };
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
+                {
+                    foreach (DataGridViewRow row in dataGridView1.Rows)
+                    {
+                        if (row.Cells["Czas rozpoczęcia zdarzenia"].Value != null &&
+                            !string.IsNullOrWhiteSpace(row.Cells["Czas rozpoczęcia zdarzenia"].Value.ToString()))
+                        {
+                            string jednostka = row.Cells["Jednostka"].Value?.ToString() ?? "";
+                            string czasRozpoczecia = row.Cells["Czas rozpoczęcia zdarzenia"].Value?.ToString() ?? "";
+                            string nrMeldunku = row.Cells["Nr meldunku"].Value?.ToString() ?? "";
+                            string czasUdzialu = row.Cells["Czas udziału"].Value?.ToString() ?? "";
+
+                            string linia = $"{jednostka};{czasRozpoczecia};{nrMeldunku};{czasUdzialu}";
+                            writer.WriteLine(linia);
+                        }
+                    }
+                }
+                MessageBox.Show("Dane zostały zapisane do pliku.", "Sukces", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Form1 form1 = new Form1();
+            form1.Show();
+        }
+
+
+
+        //____________
+        private void btnZapiszDoBazy_Click(object sender, EventArgs e)
+        {
+            if (comboBoxTabele.SelectedItem == null)
+            {
+                MessageBox.Show("Wybierz tabelę do zapisania danych.", "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string aktualneNazwisko = "";
-            foreach (DataGridViewRow row in dataGridView1.Rows)
-            {
-                if (row.Cells["Jednostka"].Value != null)
-                {
-                    string jednostka = row.Cells["Jednostka"].Value.ToString().Trim();
+            string wybranaTabela = comboBoxTabele.SelectedItem.ToString();
+            string stawka = txtStawka.Text.Trim(); // Pobranie stawki wpisanej przez użytkownika
 
-                    if (listaNazwisk.Contains(jednostka))
+            if (string.IsNullOrWhiteSpace(stawka) || !int.TryParse(stawka, out int stawkaInt))
+            {
+                MessageBox.Show("Podaj poprawną stawkę jako liczbę całkowitą.", "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    foreach (DataGridViewRow row in dataGridView1.Rows)
                     {
-                        aktualneNazwisko = jednostka;
+                        if (row.Cells["Czas rozpoczęcia zdarzenia"].Value != null &&
+                            !string.IsNullOrWhiteSpace(row.Cells["Czas rozpoczęcia zdarzenia"].Value.ToString()))
+                        {
+                            string jednostka = row.Cells["Jednostka"].Value?.ToString() ?? "";
+                            string czasRozpoczecia = row.Cells["Czas rozpoczęcia zdarzenia"].Value?.ToString() ?? "";
+                            string nrMeldunku = row.Cells["Nr meldunku"].Value?.ToString() ?? "";
+                            string czasUdzialu = row.Cells["Czas udziału"].Value?.ToString() ?? "0";
+
+                            if (!int.TryParse(czasUdzialu, out int czasUdzialuInt))
+                            {
+                                czasUdzialuInt = 0;
+                            }
+
+                            string query = $"INSERT INTO `{wybranaTabela}` (`Imię i Nazwisko`, `Nr Zdarzenia`, `Czas`, `Czas Szkolenia`, `Stawka`, `Data`) " +
+                                           "VALUES (@jednostka, @nrMeldunku, @czasUdzialu, 0, @stawka, @czasRozpoczecia)";
+
+                            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                            {
+                                cmd.Parameters.AddWithValue("@jednostka", jednostka);
+                                cmd.Parameters.AddWithValue("@nrMeldunku", nrMeldunku);
+                                cmd.Parameters.AddWithValue("@czasUdzialu", czasUdzialuInt);
+                                cmd.Parameters.AddWithValue("@stawka", stawkaInt);
+                                cmd.Parameters.AddWithValue("@czasRozpoczecia", czasRozpoczecia);
+
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
                     }
-                    else if (!string.IsNullOrEmpty(aktualneNazwisko))
-                    {
-                        row.Cells["Jednostka"].Value = aktualneNazwisko;
-                    }
+
+                    MessageBox.Show("Dane zostały zapisane do bazy.", "Sukces", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Błąd zapisu do bazy: " + ex.Message, "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
-        private void UsunPrzedrostkiZJednostki()
-        {
-            foreach (DataGridViewRow row in dataGridView1.Rows)
-            {
-                if (row.Cells["Jednostka"].Value != null)
-                {
-                    string jednostka = row.Cells["Jednostka"].Value.ToString();
-                    jednostka = Regex.Replace(jednostka, @"^dh\.?\s*", ""); // Usuwa "dh " i "dh. "
-                    row.Cells["Jednostka"].Value = jednostka;
-                }
-            }
 
-        }
     }
 }
