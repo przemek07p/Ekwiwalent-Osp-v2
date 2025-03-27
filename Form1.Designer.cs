@@ -17,6 +17,7 @@
             buttonRatownicy = new Button();
             buttonNext = new Button();
             comboBoxTables = new ComboBox();
+            button1 = new Button();
             SuspendLayout();
             // 
             // buttonAddTable
@@ -57,12 +58,13 @@
             // 
             // buttonRatownicy
             // 
-            buttonRatownicy.Location = new Point(278, 201);
+            buttonRatownicy.Location = new Point(278, 172);
             buttonRatownicy.Name = "buttonRatownicy";
             buttonRatownicy.Size = new Size(75, 23);
             buttonRatownicy.TabIndex = 8;
             buttonRatownicy.Text = "Ratownicy";
             buttonRatownicy.UseVisualStyleBackColor = true;
+            buttonRatownicy.Visible = false;
             buttonRatownicy.Click += buttonRatownicy_Click;
             // 
             // buttonNext
@@ -73,6 +75,7 @@
             buttonNext.TabIndex = 7;
             buttonNext.Text = "Dalej";
             buttonNext.UseVisualStyleBackColor = true;
+            buttonNext.Visible = false;
             buttonNext.Click += buttonNext_Click;
             // 
             // comboBoxTables
@@ -82,10 +85,22 @@
             comboBoxTables.Name = "comboBoxTables";
             comboBoxTables.Size = new Size(260, 23);
             comboBoxTables.TabIndex = 6;
+            comboBoxTables.Visible = false;
+            // 
+            // button1
+            // 
+            button1.Location = new Point(278, 201);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 9;
+            button1.Text = "Powrót";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
             // Form1
             // 
             ClientSize = new Size(363, 237);
+            Controls.Add(button1);
             Controls.Add(buttonRatownicy);
             Controls.Add(buttonNext);
             Controls.Add(comboBoxTables);
@@ -103,5 +118,6 @@
         private Button buttonRatownicy;
         private Button buttonNext;
         private ComboBox comboBoxTables;
+        private Button button1;
     }
 }

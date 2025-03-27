@@ -53,12 +53,7 @@ namespace bazy
             stawka = txtStawka.Text;
         }
 
-        private void btnPodmienNazwiska_Click(object sender, EventArgs e)
-        {
-            Funkcje.PodmienNazwiskaWExcelu(dataGridView1, listaNazwisk);
-            Funkcje.UsunPrzedrostkiZJednostki(dataGridView1);
-            Funkcje.ZaokraglijCzasUdzialu(dataGridView1);
-        }
+
 
 
         private void btnWybierzPlik_Click(object sender, EventArgs e)
@@ -194,49 +189,41 @@ namespace bazy
         }
 
 
-        private void btnZapiszDoPliku_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Title = "Zapisz plik tekstowy",
-                Filter = "Pliki tekstowe (*.txt)|*.txt",
-                DefaultExt = "txt"
-            };
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
-                {
-                    foreach (DataGridViewRow row in dataGridView1.Rows)
-                    {
-                        if (row.Cells["Czas rozpoczęcia zdarzenia"].Value != null &&
-                            !string.IsNullOrWhiteSpace(row.Cells["Czas rozpoczęcia zdarzenia"].Value.ToString()))
-                        {
-                            string jednostka = row.Cells["Jednostka"].Value?.ToString() ?? "";
-                            string czasRozpoczecia = row.Cells["Czas rozpoczęcia zdarzenia"].Value?.ToString() ?? "";
-                            string nrMeldunku = row.Cells["Nr meldunku"].Value?.ToString() ?? "";
-                            string czasUdzialu = row.Cells["Czas udziału"].Value?.ToString() ?? "";
-
-                            string linia = $"{jednostka};{czasRozpoczecia};{nrMeldunku};{czasUdzialu}";
-                            writer.WriteLine(linia);
-                        }
-                    }
-                }
-                MessageBox.Show("Dane zostały zapisane do pliku.", "Sukces", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
 
         private void button2_Click(object sender, EventArgs e)
         {
             Form1 form1 = new Form1();
             form1.Show();
+            this.Hide();
         }
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string selectedTable = comboBoxTabele.SelectedItem?.ToString();
 
+            if (string.IsNullOrWhiteSpace(selectedTable))
+            {
+                MessageBox.Show("Wybierz Kwartał.");
+                return;
+            }
+
+            Form5 form5 = new Form5(selectedTable);
+            form5.Show();
+            this.Hide();
+        }
 
 
         //____________
         private void btnZapiszDoBazy_Click(object sender, EventArgs e)
         {
+            Funkcje.PodmienNazwiskaWExcelu(dataGridView1, listaNazwisk);
+            Funkcje.UsunPrzedrostkiZJednostki(dataGridView1);
+            Funkcje.ZaokraglijCzasUdzialu(dataGridView1);
+
+
+
+
+
+
             if (comboBoxTabele.SelectedItem == null)
             {
                 MessageBox.Show("Wybierz tabelę do zapisania danych.", "Błąd", MessageBoxButtons.OK, MessageBoxIcon.Warning);

@@ -73,8 +73,8 @@ namespace bazy
         private void button1_Click(object sender, EventArgs e)
         {
             cofnijClicked = true;  // Ustaw flagę
-            Form2 form2 = new Form2(selectedTable);
-            form2.Show();
+            Form11 form11 = new Form11();
+            form11.Show();
             this.Close();
         }
 
